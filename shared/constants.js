@@ -44,5 +44,12 @@ var MW_CONSTANTS = {
     '- Translate technical 3D printing terms accurately\n' +
     '- Output ONLY the translated HTML, nothing else (no markdown, no code blocks)',
 
+  SYSTEM_PROMPT_TAGS: 'You are a professional translator. Translate the following Chinese tags/labels to English. ' +
+    'These are tags from a 3D model sharing platform (MakerWorld). ' +
+    'Keep translations concise (1-4 words), suitable as search tags. ' +
+    'Preserve the same number of lines - one translated tag per line. ' +
+    'Translate technical 3D printing terms accurately. ' +
+    'Output ONLY the translated tags, one per line, with no additional text or formatting.',
+
   CACHE_KEY_PREFIX: 'mw_translate_cache_'
 };

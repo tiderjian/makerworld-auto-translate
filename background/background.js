@@ -1,20 +1,18 @@
 // MakerWorld Auto Translate - Background Service Worker
 // Handles LLM API calls and translation caching
 
-// Service worker at extension root, so relative paths resolve correctly
-importScripts('shared/constants.js');
+// Load shared constants using extension-absolute URL (avoids relative path issues in service workers)
+importScripts(chrome.runtime.getURL('shared/constants.js'));
 
 var PRESETS = MW_CONSTANTS.PRESETS;
 var SYSTEM_PROMPT = MW_CONSTANTS.SYSTEM_PROMPT;
-var SYSTEM_PROMPT_HTML = MW_CONSTANTS.SYSTEM_PROMPT_HTML;
-var SYSTEM_PROMPT_TAGS = MW_CONSTANTS.SYSTEM_PROMPT_TAGS;
 var CACHE_KEY_PREFIX = MW_CONSTANTS.CACHE_KEY_PREFIX;
 var CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function getConfig() {
   return new Promise(function(resolve) {
     chrome.storage.local.get(['mw_config'], function(result) {
-      resolve(result.mw_config || MW_CONSTANTS.DEFAULT_CONFIG);
+      resolve(result.mw_config || DEFAULT_CONFIG);
     });
   });
 }
@@ -23,13 +21,13 @@ function getApiConfig(config) {
   if (config.preset === 'custom') {
     return {
       apiUrl: config.customApiUrl,
-      modelName: config.customModelName || config.modelName
+      modelName: config.customModelName
     };
   }
   var preset = PRESETS[config.preset];
   return {
     apiUrl: preset.apiUrl,
-    modelName: config.modelName
+    modelName: preset.modelName
   };
 }
 
@@ -43,7 +41,7 @@ function getCacheKey(text) {
   return CACHE_KEY_PREFIX + Math.abs(hash).toString(36);
 }
 
-async function callLLMApi(apiKey, apiUrl, modelName, text, prompt) {
+async function callLLMApi(apiKey, apiUrl, modelName, text) {
   if (!apiUrl.startsWith('https://')) {
     throw new Error('API URL must use HTTPS. Current: ' + apiUrl);
   }
@@ -57,7 +55,7 @@ async function callLLMApi(apiKey, apiUrl, modelName, text, prompt) {
     body: JSON.stringify({
       model: modelName,
       messages: [
-        { role: 'system', content: prompt || SYSTEM_PROMPT },
+        { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: text }
       ],
       temperature: 0.3
@@ -76,7 +74,7 @@ async function callLLMApi(apiKey, apiUrl, modelName, text, prompt) {
   throw new Error('Unexpected API response format');
 }
 
-chrome.runtime.onMessage.addListener(function(message, _sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.action !== 'translate') return false;
 
   (async function() {
@@ -111,8 +109,7 @@ chrome.runtime.onMessage.addListener(function(message, _sender, sendResponse) {
       }
 
       var apiConfig = getApiConfig(config);
-      var prompt = message.isHtml ? SYSTEM_PROMPT_HTML : (message.isTags ? SYSTEM_PROMPT_TAGS : null);
-      var translated = await callLLMApi(config.apiKey, apiConfig.apiUrl, apiConfig.modelName, text, prompt);
+      var translated = await callLLMApi(config.apiKey, apiConfig.apiUrl, apiConfig.modelName, text);
 
       var cacheData = {};
       cacheData[cacheKey] = { translated: translated, timestamp: Date.now() };

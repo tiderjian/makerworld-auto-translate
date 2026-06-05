@@ -98,6 +98,12 @@
 
     if (btn.classList.contains('mw-loading')) return;
 
+    // Tag section special handling
+    if (inputEl.closest && inputEl.closest('.modelTags')) {
+      handleTagTranslate(inputEl, btn);
+      return;
+    }
+
     if (isContentEditable(inputEl)) {
       handleRichTranslate(inputEl, btn);
       return;
@@ -269,6 +275,95 @@
     }, 3000);
 
     window.postMessage({ type: 'mw-ckeditor-set', id: id, value: html }, '*');
+  }
+
+  // --- Tag Translation ---
+
+  function handleTagTranslate(inputEl, btn) {
+    var tagSection = inputEl.closest('.modelTags');
+    if (!tagSection) return;
+
+    // Collect all existing tag texts
+    var tagContents = tagSection.querySelectorAll('.tagItem-content');
+    var tags = [];
+    for (var i = 0; i < tagContents.length; i++) {
+      tags.push(tagContents[i].textContent.trim());
+    }
+    if (tags.length === 0) return;
+
+    btn.classList.add('mw-loading');
+    btn.innerHTML = LOADING_SVG;
+
+    var tagsText = tags.join('\n');
+    chrome.runtime.sendMessage(
+      { action: 'translate', text: tagsText, isTags: true },
+      function(response) {
+        if (chrome.runtime.lastError || !response || !response.success) {
+          btn.classList.remove('mw-loading');
+          btn.innerHTML = TRANSLATE_ICON_SVG;
+          alert(chrome.runtime.lastError ? chrome.runtime.lastError.message :
+            (response && response.error) || 'Translation failed');
+          return;
+        }
+
+        var translations = response.translated.trim().split('\n').map(function(s) { return s.trim(); });
+        while (translations.length < tags.length) translations.push('');
+
+        // Delete all tags first, then add translations
+        var tagSectionEl = inputEl.closest('.modelTags');
+        deleteAllTags(tagSectionEl, function() {
+          addTagsSequentially(inputEl, translations, 0, function() {
+            btn.classList.remove('mw-loading');
+            btn.innerHTML = TRANSLATE_ICON_SVG;
+            btn.classList.add('mw-done');
+            setTimeout(function() { btn.classList.remove('mw-done'); }, 2000);
+          });
+        });
+      }
+    );
+  }
+
+  function deleteAllTags(tagSection, callback) {
+    var deleteIcon = tagSection.querySelector('.tagItem-deleteIcon');
+    if (!deleteIcon) {
+      callback();
+      return;
+    }
+
+    var rect = deleteIcon.getBoundingClientRect();
+    deleteIcon.dispatchEvent(new MouseEvent('click', {
+      bubbles: true, cancelable: true, view: window,
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + rect.height / 2
+    }));
+
+    setTimeout(function() {
+      deleteAllTags(tagSection, callback);
+    }, 200);
+  }
+
+  function addTagsSequentially(inputEl, translations, index, callback) {
+    if (index >= translations.length) {
+      callback();
+      return;
+    }
+
+    var translation = translations[index].trim();
+    if (!translation) {
+      addTagsSequentially(inputEl, translations, index + 1, callback);
+      return;
+    }
+
+    inputEl.focus();
+    setFieldValue(inputEl, translation);
+
+    inputEl.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true
+    }));
+
+    setTimeout(function() {
+      addTagsSequentially(inputEl, translations, index + 1, callback);
+    }, 400);
   }
 
   // --- Plain text setFieldValue (input/textarea only) ---
