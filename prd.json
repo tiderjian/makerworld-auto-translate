@@ -1,0 +1,90 @@
+{
+  "project": "MakerWorld Auto Translate Chrome Extension",
+  "version": "1.0.0",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Extension scaffold with manifest.json",
+      "priority": 1,
+      "passes": true,
+      "acceptanceCriteria": [
+        "manifest.json exists with Manifest V3 format, permissions for storage and activeTab",
+        "manifest.json declares content_scripts matching makerworld.com edit page URLs",
+        "manifest.json declares options_page pointing to options/options.html",
+        "manifest.json declares service_worker as background/background.js",
+        "Extension loads in chrome://extensions developer mode without errors",
+        "All required directories exist: background/, content/, options/, icons/"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Shared constants and storage utilities",
+      "priority": 2,
+      "passes": true,
+      "acceptanceCriteria": [
+        "shared/constants.js exports PRESETS object with ZhiPu and DeepSeek configurations (apiUrl, modelName)",
+        "shared/constants.js exports DEFAULT_CONFIG with empty apiKey and 'zhipu' as default preset",
+        "shared/storage.js exports getConfig() that reads from chrome.storage.local",
+        "shared/storage.js exports saveConfig(config) that writes to chrome.storage.local",
+        "shared/storage.js exports getCache(key) and setCache(key, value) for translation caching"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Options page for API configuration",
+      "priority": 3,
+      "passes": true,
+      "acceptanceCriteria": [
+        "options/options.html has form with: API Key input, preset selector (ZhiPu/DeepSeek/Custom), custom endpoint URL input",
+        "Custom endpoint URL input is hidden when preset is ZhiPu or DeepSeek, shown when Custom",
+        "Options page loads saved config on open and populates form fields",
+        "Save button persists config to chrome.storage.local via storage.js helpers",
+        "Visual feedback on save (e.g., 'Saved!' message)",
+        "options/options.css provides clean, usable styling"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Content script injects translate buttons into input fields",
+      "priority": 4,
+      "passes": true,
+      "acceptanceCriteria": [
+        "content/content.js targets all textarea and input[type=text] elements on the page",
+        "Each matched input field gets an inline translate icon button positioned inside-right of the field",
+        "Translate button uses a CSS class for styling, does not break existing page layout",
+        "content/content.css styles the translate button as a small icon (translate/globe icon via SVG or unicode)",
+        "Buttons are added on DOMContentLoaded and also observe dynamically added elements via MutationObserver",
+        "Click on translate button retrieves the input field's current value"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Translation via LLM API with caching",
+      "priority": 5,
+      "passes": true,
+      "acceptanceCriteria": [
+        "background/background.js exposes chrome.runtime.onMessage handler for 'translate' action",
+        "translate handler reads config (apiKey, preset/endpoint) from storage",
+        "If apiKey is empty, returns error message asking user to configure in options page",
+        "Calls OpenAI-compatible chat completions API with system prompt for Chinese-to-English translation",
+        "Uses content hash as cache key; checks cache before calling API",
+        "On successful API response, caches the translation result and returns translated text",
+        "On API error, returns meaningful error message",
+        "Content script receives translated text and sets input field value, dispatches input event for React compatibility"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "End-to-end integration and polish",
+      "priority": 6,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Full flow works: open options → set API key → select preset → save → go to edit page → click translate → see English text",
+        "Translation button shows loading state (spinner/disabled) while API call is in progress",
+        "If API key not configured, clicking translate shows alert directing to options page",
+        "Cached translations return instantly without API call on second click of same content",
+        "manifest.json includes appropriate icons (placeholder SVG icons are acceptable)"
+      ]
+    }
+  ]
+}

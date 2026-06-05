@@ -1,0 +1,82 @@
+/* MakerWorld Auto Translate - Content Script Styles */
+
+/* Make parent a positioning context for the button */
+.mw-relative-parent {
+  position: relative !important;
+}
+
+/* Add right padding to input for button space */
+.mw-translate-input:not(.mw-translate-rich) {
+  padding-right: 32px !important;
+}
+
+/* Rich text editors: no padding, button floats at top-right */
+.mw-translate-rich {
+  position: relative;
+}
+
+/* Translate button */
+.mw-translate-btn {
+  position: absolute;
+  z-index: 9999;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+/* Show on hover over parent or focus */
+.mw-relative-parent:hover > .mw-translate-btn,
+.mw-translate-input:focus ~ .mw-translate-btn,
+.mw-translate-btn:focus {
+  opacity: 1;
+}
+
+.mw-translate-btn:hover {
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.1);
+}
+
+.mw-translate-btn:focus {
+  outline: 2px solid #1677ff;
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+.mw-translate-btn svg {
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+/* Loading spinner */
+.mw-translate-btn.mw-loading {
+  opacity: 1;
+  color: #1677ff;
+}
+
+.mw-spin {
+  animation: mw-spin-anim 1s linear infinite;
+}
+
+@keyframes mw-spin-anim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Done state */
+.mw-translate-btn.mw-done {
+  opacity: 1;
+  color: #52c41a;
+}

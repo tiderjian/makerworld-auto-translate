@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MakerWorld Auto Translate - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>MW Auto Translate Settings</h1>
+    <p class="subtitle">Configure your LLM API for Chinese-to-English translation</p>
+
+    <form id="config-form">
+      <div class="form-group">
+        <label for="preset">Model Provider</label>
+        <select id="preset">
+          <option value="zhipu">ZhiPu (智谱)</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="custom">Custom (OpenAI Compatible)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="apiKey">API Key</label>
+        <input type="password" id="apiKey" placeholder="Enter your API key">
+        <small>Your API key is stored locally and never sent anywhere except the selected API endpoint.</small>
+      </div>
+
+      <div id="model-section" class="form-group">
+        <label>Model</label>
+        <div class="model-row">
+          <select id="modelSelect">
+            <option value="">-- Enter API key first, then fetch models --</option>
+          </select>
+          <button type="button" id="fetchModelsBtn" class="btn-fetch">Fetch Models</button>
+        </div>
+        <div class="model-custom-row">
+          <input type="text" id="modelInput" placeholder="Type custom model name (overrides dropdown)">
+          <small>Select from dropdown or type a custom model name.</small>
+        </div>
+      </div>
+
+      <div id="custom-fields" class="hidden">
+        <div class="form-group">
+          <label for="customApiUrl">Custom API URL</label>
+          <input type="url" id="customApiUrl" placeholder="https://api.example.com/v1/chat/completions">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-save">Save Configuration</button>
+    </form>
+
+    <div id="status" class="status hidden"></div>
+
+    <div class="help">
+      <h3>How to get an API Key</h3>
+      <ul>
+        <li><strong>ZhiPu:</strong> Register at <a href="https://open.bigmodel.cn" target="_blank">open.bigmodel.cn</a></li>
+        <li><strong>DeepSeek:</strong> Register at <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="../shared/constants.js"></script>
+  <script src="../shared/storage.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

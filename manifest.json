@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "MakerWorld Auto Translate",
+  "version": "1.0.0",
+  "description": "Translate Chinese text to English on MakerWorld international site edit pages using LLM APIs",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "*://*.makerworld.com/*",
+    "*://open.bigmodel.cn/*",
+    "*://api.deepseek.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.makerworld.com/*"],
+      "js": [
+        "shared/constants.js",
+        "shared/storage.js",
+        "content/content.js"
+      ],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.makerworld.com/*"],
+      "js": ["content/ckeditor-bridge.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    }
+  ],
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "MakerWorld Auto Translate"
+  }
+}

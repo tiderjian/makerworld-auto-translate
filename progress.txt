@@ -1,0 +1,43 @@
+# MakerWorld Auto Translate - Ralph Progress
+
+## Project Start: 2026-04-05
+
+### Architecture
+- Chrome Extension Manifest V3
+- No build tools / no framework - pure JS/CSS
+- Content Script injects into makerworld.com pages
+- Background Service Worker handles API calls + cache
+- Options Page for user configuration
+- Shared modules for constants and storage helpers
+
+### Stories Completed
+- US-001: Extension scaffold (manifest.json + directory structure) ✓
+- US-002: Shared constants and storage utilities ✓
+- US-003: Options page ✓
+- US-004: Content script (translate buttons) ✓
+- US-005: Translation API + caching ✓
+- US-006: End-to-end integration ✓
+
+### Files Changed
+- manifest.json
+- shared/constants.js - PRESETS (ZhiPu, DeepSeek), DEFAULT_CONFIG, SYSTEM_PROMPT
+- shared/storage.js - getConfig(), saveConfig()
+- background/background.js - API calls, cache with 7-day TTL, HTTPS validation
+- content/content.js - DOM injection, non-wrapping sibling approach, React-compatible value setting
+- content/content.css - Button styles, hover/focus states, loading spinner
+- options/options.html - Config form with preset selector
+- options/options.js - Load/save config, toggle custom fields
+- options/options.css - Clean form styling
+- icons/icon16.png, icon48.png, icon128.png - Placeholder icons
+
+### Architect Review Fixes
+- Fixed input selector bug (broad query + filter instead of CSS-only)
+- Added 7-day cache TTL expiration
+- Added HTTPS URL validation for API endpoints
+- Changed from DOM-wrapping to non-wrapping sibling approach for buttons
+- Added window resize handler for button repositioning
+- Removed dead code (unused getCacheKey/getCache/setCache in storage.js)
+
+### Deslop Pass
+- Removed 3 unused functions from shared/storage.js
+- No other slop found
